@@ -1,12 +1,13 @@
+import json
+
 import pytest
-import time
 from starlette.datastructures import Secret
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import PlainTextResponse
 from starlette.testclient import TestClient
 from wtforms import ValidationError
 
-from starlette_wtf.util import generate_csrf, validate_csrf
+from starlette_wtf.util import generate_csrf, get_formdata, validate_csrf
 
 
 @pytest.fixture
@@ -18,6 +19,32 @@ def make_app(app):
         return app, client
 
     return _make_app
+
+
+def test_get_formdata(make_app):
+    app, client = make_app()
+
+    async def index(request):
+        formdata = await get_formdata(request)
+        return PlainTextResponse(str(formdata))
+
+    app.add_route('/', methods=['POST'], route=index)
+
+    # test form body success
+    response = client.post('/', data={'name': 'value'})
+    assert response.text == "FormData([('name', 'value')])"
+
+    # test json body success
+    response = client.post('/', content=json.dumps({'name': 'value'}), headers={'content-type': 'application/json'})
+    assert response.text == "ImmutableMultiDict([('name', 'value')])"
+
+    # test invalid form body
+    response = client.post('/', content='not a form')
+    assert response.text == "FormData([])"
+
+    # test invalid json body
+    response = client.post('/', content='not json', headers={'content-type': 'application/json'})
+    assert response.text == "ImmutableMultiDict([])"
 
 
 def test_generate_csrf(make_app):

@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import hashlib
 import hmac
 import os
+from json import JSONDecodeError
 
 from itsdangerous import BadData, SignatureExpired, URLSafeTimedSerializer
 from starlette.datastructures import ImmutableMultiDict, Secret
@@ -56,7 +57,10 @@ async def get_formdata(request: StarletteRequest):
 
     """
     if request.headers.get('content-type') == 'application/json':
-        formdata = ImmutableMultiDict(await request.json())
+        try:
+            formdata = ImmutableMultiDict(await request.json())
+        except JSONDecodeError:
+            formdata = ImmutableMultiDict()
     else:
         formdata = await request.form()
 
