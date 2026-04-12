@@ -77,14 +77,15 @@ class StarletteForm(Form):
         # for WTForms CSRF handling
         if hasattr(request.state, 'csrf_config'):
             config = request.state.csrf_config
-            kwargs['meta'] = {
+            kwargs.setdefault("meta", {})
+            kwargs['meta'].update({
                 'csrf': config['enabled'],
                 'csrf_secret': str(config['csrf_secret']).encode('utf-8'),
                 'csrf_class': config['csrf_class'],
                 'csrf_context': request,
                 'csrf_field_name': config['csrf_field_name'],
                 'csrf_time_limit': config['csrf_time_limit']
-            }
+            })
 
         super().__init__(*args, **kwargs)
 
