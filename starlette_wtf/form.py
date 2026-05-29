@@ -77,20 +77,25 @@ class StarletteForm(Form):
         # for WTForms CSRF handling
         if hasattr(request.state, 'csrf_config'):
             config = request.state.csrf_config
-            kwargs['meta'] = {
+
+            # merge CSRF settings into any caller-supplied `meta` without
+            # mutating the caller's dict or discarding their other options
+            meta = dict(kwargs.get('meta') or {})
+            meta.update({
                 'csrf': config['enabled'],
                 'csrf_secret': str(config['csrf_secret']).encode('utf-8'),
                 'csrf_class': config['csrf_class'],
                 'csrf_context': request,
                 'csrf_field_name': config['csrf_field_name'],
                 'csrf_time_limit': config['csrf_time_limit']
-            }
+            })
+            kwargs['meta'] = meta
 
         super().__init__(*args, **kwargs)
 
     @classmethod
     async def from_formdata(cls, request: StarletteRequest, formdata=_Auto,
-                            **kwargs):
+                            **kwargs) -> 'StarletteForm':
         """Method to support initializing class from submitted formdata. If
         request is a POST, PUT, PATCH or DELETE, form will be initialized using
         formdata. Otherwise, it will be initialized using defaults.
