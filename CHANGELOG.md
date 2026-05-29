@@ -1,5 +1,10 @@
 # Starlette-WTF Changelog
 
+# 0.5.0 - May 29, 2026
+
+* Fixed StarletteForm to preserve caller-supplied `Meta` when merging CSRF
+  settings (#48)
+
 # 0.4.1 - May 6, 2021
 
 * Fixed issue with @csrf_protect decorator when applied to a function without a
