@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import asyncio
 import inspect
+import typing as t
 
 from starlette.datastructures import ImmutableMultiDict
 from starlette.requests import Request as StarletteRequest
@@ -91,7 +92,7 @@ class StarletteForm(Form):
 
     @classmethod
     async def from_formdata(cls, request: StarletteRequest, formdata=_Auto,
-                            **kwargs):
+                            **kwargs) -> t.Self:
         """Method to support initializing class from submitted formdata. If
         request is a POST, PUT, PATCH or DELETE, form will be initialized using
         formdata. Otherwise, it will be initialized using defaults.
